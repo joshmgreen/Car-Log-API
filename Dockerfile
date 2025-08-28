@@ -1,30 +1,24 @@
-# Stage 1: Build
+# Build stage
 FROM golang:1.24.5 AS build
 
-# Set working directory
 WORKDIR /app
 
-# Copy go.mod and go.sum first (for caching)
+# Copy go.mod and go.sum first to leverage caching
 COPY go.mod go.sum ./
 RUN go mod download
 
-# Copy the rest of the source code
+# Copy all source files
 COPY . .
 
-# Build the Go binary from the web-service folder
-WORKDIR /app/web-service
-RUN CGO_ENABLED=0 GOOS=linux go build -o carlog
+# Build the binary from the cmd folder
+RUN CGO_ENABLED=0 GOOS=linux go build -o carlog ./cmd/car-log-api
 
-# Stage 2: Runtime
-FROM debian:bookworm-slim
+# Final stage
+FROM alpine:latest
+
 WORKDIR /root/
+COPY --from=build /app/carlog .
 
-# Install certificates in case HTTPS calls are made
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    ca-certificates \
- && rm -rf /var/lib/apt/lists/*
-
-# Copy binary from build stage
-COPY --from=build /app/web-service/carlog .
+EXPOSE 8080
 
 CMD ["./carlog"]
