@@ -27,15 +27,15 @@ func DeleteVehicleByID(id uint) (bool, error) {
 }
 
 // GetVehicleByModel returns a vehicle matching the model (case-insensitive)
-func GetVehicleByModel(modelName string) (*model.Vehicle, error) {
-	var vehicle model.Vehicle
+func GetVehicleByModel(modelName string) ([]model.Vehicle, error) {
+	var vehicles []model.Vehicle
 	result := db.DB.
 		Where("LOWER(model) LIKE ?", "%" + strings.ToLower(modelName)+"%").
-		First(&vehicle)
+		Find(&vehicles)
 	if result.Error != nil {
 		return nil, result.Error
 	}
-	return &vehicle, nil
+	return vehicles, nil
 }
 
 // UpdateVehicle updates an existing vehicle
