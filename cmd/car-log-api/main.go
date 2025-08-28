@@ -2,23 +2,20 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/joshmgreen/Car-Log-API/handlers"
 	"github.com/joshmgreen/Car-Log-API/internal/db"
+	"github.com/joshmgreen/Car-Log-API/internal/vehicles/handlers"
 )
 
 func main() {
-	// Initialize database and run migrations
 	db.Init()
 
-	//Router setup
 	router := gin.Default()
 
-	// Register handlers
-	router.GET("/vehicles", handlers.HandleGetVehicles)
-	router.GET("/vehicles/model/:model", handlers.HandleGetVehicleByModel)
-	router.POST("/vehicles", handlers.HandleAddVehicle)
-	router.PUT("/vehicles/:id", handlers.HandleUpdateVehicle)
-	router.DELETE("/vehicles/:id", handlers.HandleDeleteVehicleById)
+	router.GET("/vehicles", handlers.GetVehiclesHandler)
+	router.GET("/vehicles/model/:model", handlers.GetVehicleByModelHandler)
+	router.POST("/vehicles", handlers.AddVehicleHandler)
+	router.PUT("/vehicles/:id", handlers.UpdateVehicleHandler)
+	router.DELETE("/vehicles/:id", handlers.DeleteVehicleHandler)
 
 	router.Run("0.0.0.0:8080")
 }

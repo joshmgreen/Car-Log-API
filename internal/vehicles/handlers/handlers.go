@@ -6,18 +6,17 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/joshmgreen/Car-Log-API/models"
-	"github.com/joshmgreen/Car-Log-API/vehicles"
+	"github.com/joshmgreen/Car-Log-API/internal/vehicles/model"
+	"github.com/joshmgreen/Car-Log-API/internal/vehicles/service"
 )
 
-// Standardized API response
+// APIResponse standardizes responses
 type APIResponse struct {
 	Success bool        `json:"success"`
 	Data    interface{} `json:"data,omitempty"`
 	Error   string      `json:"error,omitempty"`
 }
 
-// -------- Helper functions --------
 func parseID(c *gin.Context) (uint, bool) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -31,11 +30,8 @@ func respondError(c *gin.Context, err error, status int) {
 	c.JSON(status, APIResponse{Success: false, Error: err.Error()})
 }
 
-// -------- Handlers --------
-
-// GET /vehicles
-func HandleGetVehicles(c *gin.Context) {
-	v, err := vehicles.GetVehicles()
+func GetVehiclesHandler(c *gin.Context) {
+	v, err := service.GetVehicles()
 	if err != nil {
 		respondError(c, err, http.StatusInternalServerError)
 		return
@@ -43,10 +39,9 @@ func HandleGetVehicles(c *gin.Context) {
 	c.JSON(http.StatusOK, APIResponse{Success: true, Data: v})
 }
 
-// GET /vehicles/model/:model
-func HandleGetVehicleByModel(c *gin.Context) {
-	modelParam := c.Param("model")
-	v, err := vehicles.GetVehicleByModel(modelParam)
+func GetVehicleByModelHandler(c *gin.Context) {
+	modelName := c.Param("model")
+	v, err := service.GetVehicleByModel(modelName)
 	if err != nil {
 		respondError(c, err, http.StatusNotFound)
 		return
@@ -54,63 +49,53 @@ func HandleGetVehicleByModel(c *gin.Context) {
 	c.JSON(http.StatusOK, APIResponse{Success: true, Data: v})
 }
 
-// POST /vehicles
-func HandleAddVehicle(c *gin.Context) {
-	var newVehicle models.Vehicle
-	if err := c.ShouldBindJSON(&newVehicle); err != nil {
+func AddVehicleHandler(c *gin.Context) {
+	var v model.Vehicle
+	if err := c.ShouldBindJSON(&v); err != nil {
 		respondError(c, err, http.StatusBadRequest)
 		return
 	}
-
-	if err := vehicles.AddVehicle(newVehicle); err != nil {
+	if err := service.AddVehicle(v); err != nil {
 		respondError(c, err, http.StatusInternalServerError)
 		return
 	}
-
-	log.Printf("Vehicle added: %+v", newVehicle)
-	c.JSON(http.StatusCreated, APIResponse{Success: true, Data: newVehicle})
+	log.Printf("Vehicle added: %+v", v)
+	c.JSON(http.StatusCreated, APIResponse{Success: true, Data: v})
 }
 
-// PUT /vehicles/:id
-func HandleUpdateVehicle(c *gin.Context) {
+func UpdateVehicleHandler(c *gin.Context) {
 	id, ok := parseID(c)
 	if !ok {
 		return
 	}
-
-	var vehicle models.Vehicle
-	if err := c.ShouldBindJSON(&vehicle); err != nil {
+	var v model.Vehicle
+	if err := c.ShouldBindJSON(&v); err != nil {
 		respondError(c, err, http.StatusBadRequest)
 		return
 	}
-	vehicle.ID = id
-
-	updated, err := vehicles.UpdateVehicle(vehicle)
+	v.ID = id
+	updated, err := service.UpdateVehicle(v)
 	if err != nil {
 		respondError(c, err, http.StatusInternalServerError)
 		return
 	}
-
 	if updated {
-		c.JSON(http.StatusOK, APIResponse{Success: true, Data: vehicle})
+		c.JSON(http.StatusOK, APIResponse{Success: true, Data: v})
 	} else {
 		c.JSON(http.StatusNotFound, APIResponse{Success: false, Error: "Vehicle not found"})
 	}
 }
 
-// DELETE /vehicles/:id
-func HandleDeleteVehicleById(c *gin.Context) {
+func DeleteVehicleHandler(c *gin.Context) {
 	id, ok := parseID(c)
 	if !ok {
 		return
 	}
-
-	deleted, err := vehicles.DeleteVehicleByID(int(id))
+	deleted, err := service.DeleteVehicleByID(id)
 	if err != nil {
 		respondError(c, err, http.StatusInternalServerError)
 		return
 	}
-
 	if deleted {
 		c.JSON(http.StatusOK, APIResponse{Success: true, Data: "Vehicle deleted"})
 	} else {

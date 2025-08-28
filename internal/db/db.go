@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/joshmgreen/Car-Log-API/models"
+	"github.com/joshmgreen/Car-Log-API/internal/vehicles/model"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -32,15 +32,15 @@ func Init() {
 	DB = database
 
 	// Auto-migrate Vehicle table
-	if err := DB.AutoMigrate(&models.Vehicle{}); err != nil {
+	if err := DB.AutoMigrate(&model.Vehicle{}); err != nil {
 		log.Fatalf("failed to auto-migrate: %v", err)
 	}
 
 	// Optional: Seed one vehicle if table is empty
 	var count int64
-	DB.Model(&models.Vehicle{}).Count(&count)
+	DB.Model(&model.Vehicle{}).Count(&count)
 	if count == 0 {
-		DB.Create(&models.Vehicle{
+		DB.Create(&model.Vehicle{
 			Year:    2025,
 			Make:    "Honda",
 			Model:   "Civic Si",

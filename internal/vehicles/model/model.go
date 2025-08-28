@@ -1,5 +1,6 @@
-package models
+package model
 
+// Vehicle represents a car log entry
 type Vehicle struct {
 	ID      uint   `gorm:"primaryKey" json:"id"`
 	Year    int    `json:"year"`
