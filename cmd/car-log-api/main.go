@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/joshmgreen/Car-Log-API/db"
 	"github.com/joshmgreen/Car-Log-API/handlers"
+	"github.com/joshmgreen/Car-Log-API/internal/db"
 )
 
 func main() {

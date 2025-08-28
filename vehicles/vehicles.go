@@ -3,7 +3,7 @@ package vehicles
 import (
 	"strings"
 
-	"github.com/joshmgreen/Car-Log-API/db"
+	"github.com/joshmgreen/Car-Log-API/internal/db"
 	"github.com/joshmgreen/Car-Log-API/models"
 )
 
