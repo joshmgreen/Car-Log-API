@@ -17,8 +17,18 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o carlog ./cmd/car-log-api
 FROM alpine:latest
 
 WORKDIR /root/
+
+# Install Postgres client for wait-for-postgres.sh
+RUN apk add --no-cache postgresql-client bash
+
+# Copy built binary
 COPY --from=build /app/carlog .
+
+# Copy wait-for script
+COPY wait-for-postgres.sh .
+RUN chmod +x wait-for-postgres.sh
 
 EXPOSE 8080
 
-CMD ["./carlog"]
+# Use wait-for-postgres.sh to start the API
+CMD ["./wait-for-postgres.sh", "db", "./carlog"]
